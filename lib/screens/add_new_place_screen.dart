@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import '../widgets/location_input.dart';
 import '../providers/places.dart';
 import 'package:provider/provider.dart';
 import '../widgets/image_input.dart';
@@ -73,7 +74,7 @@ class _AddNewPlaceScreenState extends State<AddNewPlaceScreen> {
                         decoration: InputDecoration(
                           labelText: 'Title',
                           errorText:
-                              _isTitleEmpty ? 'Please Enter a value' : null,
+                              _isTitleEmpty ? 'Please Enter a Title' : null,
                           border: const OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(25)),
@@ -87,6 +88,12 @@ class _AddNewPlaceScreenState extends State<AddNewPlaceScreen> {
                           : deviceSize.height * 0.02,
                     ),
                     ImageInput(_selectTheFile),
+                    SizedBox(
+                      height: _isLandscape
+                          ? deviceSize.height * 0.05
+                          : deviceSize.height * 0.02,
+                    ),
+                    const LocationInput(),
                   ],
                 ),
               ),
