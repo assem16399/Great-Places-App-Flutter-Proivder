@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import '../helpers/location_helper.dart';
 import '../models/place.dart';
 import '../helpers/db_helper.dart';
 
@@ -11,38 +12,59 @@ class PlacesProvider with ChangeNotifier {
     return [..._places];
   }
 
+  Place findPlaceById(String id) {
+    return _places.firstWhere((place) => place.id == id);
+  }
+
   Future<void> fetchAndSetPlaces() async {
     final extractedData = await DBHelper.getData('user_places');
 
     _places = extractedData
         .map((place) => Place(
-            id: place['id'],
-            title: place['title'],
-            image: File(place['image']),
-            location: null))
+              id: place['id'],
+              title: place['title'],
+              image: File(place['image']),
+              location: PlaceLocation(
+                  latitude: place['location_lat'],
+                  longitude: place['location_lng'],
+                  address: place['location_address']),
+            ))
         .toList();
 
     notifyListeners();
   }
 
-  void addPlace({
+  Future<void> addPlace({
     required String title,
-    //required PlaceLocation location,
+    required PlaceLocation location,
     required File image,
-  }) {
-    final newPlace = Place(
-        id: DateTime.now().toString(),
-        title: title,
-        image: image,
-        location: null);
-    _places.add(newPlace);
-    notifyListeners();
+  }) async {
+    try {
+      final readableAddress = await LocationHelper.getPlaceAddress(
+          location.latitude, location.longitude);
+      final loc = PlaceLocation(
+          latitude: location.latitude,
+          longitude: location.longitude,
+          address: readableAddress);
+      final newPlace = Place(
+          id: DateTime.now().toString(),
+          title: title,
+          image: image,
+          location: loc);
+      _places.add(newPlace);
+      notifyListeners();
 
-    DBHelper.insert('user_places', {
-      'id': newPlace.id,
-      'title': newPlace.title,
-      'image': newPlace.image.path,
-    });
+      DBHelper.insert('user_places', {
+        'id': newPlace.id,
+        'title': newPlace.title,
+        'image': newPlace.image.path,
+        'location_lat': newPlace.location!.latitude,
+        'location_lng': newPlace.location!.longitude,
+        'location_address': newPlace.location!.address,
+      });
+    } catch (error) {
+      rethrow;
+    }
   }
 
   void deletePlace(String id) {

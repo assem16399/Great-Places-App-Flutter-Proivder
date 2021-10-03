@@ -5,11 +5,12 @@ import 'package:sqflite/sqlite_api.dart';
 class DBHelper {
   static Future<Database> database() async {
     final dbPath = await sql.getDatabasesPath();
+    //await sql.deleteDatabase(path.join(dbPath, 'places.db'));
 
     return sql.openDatabase(path.join(dbPath, 'places.db'),
         onCreate: (db, version) async {
       await db.execute(
-          'CREATE TABLE user_places(id TEXT PRIMARY KEY,title TEXT,image TEXT)');
+          'CREATE TABLE user_places(id TEXT PRIMARY KEY,title TEXT,image TEXT,location_lat REAL,location_lng REAL,location_address TEXT )');
     }, version: 1);
   }
 

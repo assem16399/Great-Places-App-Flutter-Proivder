@@ -9,19 +9,18 @@ class PlacesListItem extends StatelessWidget {
   final String? title;
   final File? image;
   final String id;
+  final String? address;
 
-  PlacesListItem({
-    required this.id,
-    this.title,
-    this.image,
-  });
+  const PlacesListItem(
+      {required this.id, this.title, this.image, this.address});
 
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).pushNamed(PlaceDetailsScreen.routeName);
+        Navigator.of(context)
+            .pushNamed(PlaceDetailsScreen.routeName, arguments: id);
       },
       child: Card(
         elevation: 2,
@@ -55,6 +54,7 @@ class PlacesListItem extends StatelessWidget {
                   ),
                 ),
               ),
+              subtitle: Text(address ?? ''),
               trailing: IconButton(
                 onPressed: () {
                   Provider.of<PlacesProvider>(context, listen: false)

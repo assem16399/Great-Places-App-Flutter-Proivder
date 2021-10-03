@@ -65,6 +65,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
                           id: placesData.places[index].id!,
                           title: placesData.places[index].title,
                           image: placesData.places[index].image,
+                          address: placesData.places[index].location!.address,
                         ),
                       ),
               );

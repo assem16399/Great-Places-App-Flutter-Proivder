@@ -1,25 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:great_places_app/helpers/location_helper.dart';
+import 'package:great_places_app/models/place.dart';
 import 'package:great_places_app/screens/maps_screen.dart';
 import 'package:location/location.dart';
 
 class LocationInput extends StatefulWidget {
-  const LocationInput({Key? key}) : super(key: key);
+  final Function onLocationSelect;
+  const LocationInput(this.onLocationSelect);
 
   @override
   _LocationInputState createState() => _LocationInputState();
 }
 
 class _LocationInputState extends State<LocationInput> {
-  void _getUserLocation() async {
-    final locationData = await Location().getLocation();
-    print(locationData.latitude);
-    print(locationData.longitude);
-
+  void _showStaticMapPreview(double lat, double lng) {
     setState(() {
       _previewImageUrl = LocationHelper.generateLocationPreviewImage(
-          latitude: locationData.latitude, longitude: locationData.longitude);
+          latitude: lat, longitude: lng);
     });
+  }
+
+  void _getUserCurrentLocation() async {
+    try {
+      final locationData = await Location().getLocation();
+      _showStaticMapPreview(locationData.latitude!, locationData.longitude!);
+      widget.onLocationSelect(locationData.latitude, locationData.longitude);
+    } catch (_) {
+      return;
+    }
+  }
+
+  void _selectOnMapScreen() async {
+    final userCurrentLocation = await Location().getLocation();
+    final selectedLocation = await Navigator.of(context).push<LatLng?>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) => MapScreen(
+          initialPlaceLocation: PlaceLocation(
+              latitude: userCurrentLocation.latitude!,
+              longitude: userCurrentLocation.longitude!),
+          isSelecting: true,
+        ),
+      ),
+    );
+    if (selectedLocation == null) {
+      return;
+    }
+    // the location that the user picked
+    _showStaticMapPreview(
+        selectedLocation.latitude, selectedLocation.longitude);
+
+    widget.onLocationSelect(
+        selectedLocation.latitude, selectedLocation.longitude);
   }
 
   String? _previewImageUrl;
@@ -56,7 +89,7 @@ class _LocationInputState extends State<LocationInput> {
               : MainAxisAlignment.spaceBetween,
           children: [
             ElevatedButton.icon(
-              onPressed: _getUserLocation,
+              onPressed: _getUserCurrentLocation,
               icon: const Icon(Icons.location_on),
               label: Text(
                 'Current Location',
@@ -68,9 +101,7 @@ class _LocationInputState extends State<LocationInput> {
               width: deviceSize.width * 0.015,
             ),
             ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).pushNamed(MapScreen.routeName);
-              },
+              onPressed: _selectOnMapScreen,
               icon: const Icon(Icons.map),
               label: Text('Chose From The Map',
                   style: TextStyle(
