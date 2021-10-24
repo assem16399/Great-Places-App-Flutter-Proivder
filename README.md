@@ -5,4 +5,4 @@ and using the device native features such as: the camera to take pictures for vi
 and google maps and the user location.
 
 
-Feel free to see the Code and run it. You just will need to use ur API Key in location_helper.dart file.
+Feel free to see the Code and run it. You just will need to use ur Google API Key in location_helper.dart file.
